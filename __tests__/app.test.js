@@ -38,17 +38,12 @@ describe("GET /api/topics", () => {
         });
       });
   });
-  // test("200: Responds with an array of topic objects", () => {
-  //   return request(app)
-  //     .get("/api/topics")
-  //     .expect(200)
-  //     .then(({ body: { topics } }) => {
-  //       expect(topics).toHaveLength(3);
-  //       topics.forEach((topic) => {
-  //         expect(topic).toHaveProperty(slug);
-  //         expect(topic).toHaveProperty(description);
-  //         expect(topic).toHaveProperty(img_url);
-  //       });
-  //     });
-  // });
+  test("404: Attempting to access a non-existent endpoint ", () => {
+    return request(app)
+      .get("/api/notanendpoint")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not found");
+      });
+  });
 });

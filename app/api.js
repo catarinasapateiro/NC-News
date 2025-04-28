@@ -9,4 +9,8 @@ app.get("/api", (req, res) => {
 
 app.get("/api/topics", getTopics);
 
+app.all("/*splat", (req, res) => {
+  res.status(404).send({ msg: "Not found" });
+});
+
 module.exports = { app };
