@@ -99,7 +99,7 @@ const seed = ({ topicData, userData, articleData, commentData }) => {
     })
     .then((articles) => {
       const articlesRefObject = createRef(articles.rows);
-      console.log(articlesRefObject);
+
       const formattedComments = commentData.map((comment) => {
         const newComment = convertTimestampToDate(comment);
 
@@ -125,4 +125,4 @@ const seed = ({ topicData, userData, articleData, commentData }) => {
     });
 };
 
-module.exports = seed;
+module.exports = { seed };
