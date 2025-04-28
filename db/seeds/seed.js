@@ -121,7 +121,7 @@ const seed = ({ topicData, userData, articleData, commentData }) => {
       return db.query(insertComments);
     })
     .then(() => {
-      console.log("Seed completes");
+      // console.log("Seed completes");
     });
 };
 
