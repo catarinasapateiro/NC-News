@@ -563,7 +563,7 @@ describe("seed", () => {
   });
 });
 
-describe.only("data insertion", () => {
+describe("data insertion", () => {
   test("topics data has been inserted correctly", () => {
     return db.query(`SELECT * FROM topics;`).then(({ rows: topics }) => {
       expect(topics).toHaveLength(3);
@@ -612,6 +612,7 @@ describe.only("data insertion", () => {
         expect(comment).toHaveProperty("author");
         expect(comment).toHaveProperty("votes");
         expect(comment).toHaveProperty("created_at");
+        expect(typeof comment.article_id).toBe("number");
       });
     });
   });
