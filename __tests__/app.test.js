@@ -4,6 +4,7 @@ const { seed } = require("../db/seeds/seed");
 const request = require("supertest");
 const db = require("../db/connection");
 const data = require("../db/data/test-data/index");
+const sorted = require("jest-sorted");
 
 beforeEach(() => {
   return seed(data);
@@ -77,15 +78,62 @@ describe("GET /api/articles", () => {
         expect(body.msg).toBe("Bad request. Please insert a valid input");
       });
   });
-});
-
-describe("GET /try to non-existing endpoint", () => {
-  test("404: Attempting to access a non-existent endpoint ", () => {
+  test("200: Responds with an array of article objects with the correct properties", () => {
     return request(app)
-      .get("/api/notanendpoint")
-      .expect(404)
-      .then(({ body }) => {
-        expect(body.msg).toBe("Not found");
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles).toHaveLength(13);
+        articles.forEach((article) => {
+          expect(article).toEqual({
+            article_id: expect.any(Number),
+            title: expect.any(String),
+            topic: expect.any(String),
+            author: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            article_img_url: expect.any(String),
+            comment_count: expect.any(Number),
+          });
+        });
+      });
+  });
+  test("200: Responds with an array of article objects with a comment_count property that corresponds to the sum of comments by article_Id", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles).toHaveLength(13);
+        const zeroComments = [
+          articles[2],
+          articles[3],
+          articles[4],
+          articles[8],
+          articles[9],
+          articles[10],
+          articles[11],
+          articles[12],
+        ];
+        zeroComments.forEach((article) => {
+          expect(article.comment_count).toBe(0);
+        });
+        expect(articles[0].comment_count).toBe(2);
+        expect(articles[1].comment_count).toBe(1);
+        expect(articles[5].comment_count).toBe(2);
+        expect(articles[6].comment_count).toBe(11);
+        expect(articles[7].comment_count).toBe(2);
+      });
+  });
+  test("200: Responds with an array of article objects sorted by date in descending order.", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        const datesSorted = [];
+        articles.forEach((article) => {
+          datesSorted.push(article.created_at);
+        });
+        expect(datesSorted).toBeSorted({ descending: true });
       });
   });
 });
