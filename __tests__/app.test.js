@@ -273,6 +273,58 @@ describe("POST /api/articles/:article_id/comments", () => {
   });
 });
 
+describe("PATCH /api/articles/:article_id", () => {
+  test("200: Responds with the updated article when passed a positive integer", () => {
+    return request(app)
+      .patch("/api/articles/3")
+      .send({ inc_votes: 5 })
+      .expect(200)
+      .then(({ body: { article } }) => {
+        expect(article.votes).toBe(5);
+        expect(article.article_id).toBe(3);
+      });
+  });
+  test("200: Responds with the updated article when passed a negative integer", () => {
+    return request(app)
+      .patch("/api/articles/3")
+      .send({ inc_votes: -10 })
+      .expect(200)
+      .then(({ body: { article } }) => {
+        expect(article.votes).toBe(-10);
+        expect(article.article_id).toBe(3);
+      });
+  });
+  test("404: When passed a valid article_id that does not exist in the database", () => {
+    return request(app)
+      .patch("/api/articles/70")
+      .send({ inc_votes: 1 })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Article id not found");
+      });
+  });
+
+  test("400: Bad request when passed an invalid article_id ", () => {
+    return request(app)
+      .patch("/api/articles/poney")
+      .send({ inc_votes: 1 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request. Please insert a valid input");
+      });
+  });
+
+  test("400: Bad request when passed an invalid object input ", () => {
+    return request(app)
+      .patch("/api/articles/1")
+      .send({ inc_votes: "cat" })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request. Please insert a valid input");
+      });
+  });
+});
+
 describe("GET /try to non-existing endpoint", () => {
   test("404: Attempting to access a non-existent endpoint ", () => {
     return request(app)
