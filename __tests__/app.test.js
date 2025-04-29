@@ -5,6 +5,7 @@ const request = require("supertest");
 const db = require("../db/connection");
 const data = require("../db/data/test-data/index");
 const sorted = require("jest-sorted");
+const bodyParser = require("body-parser");
 
 beforeEach(() => {
   return seed(data);
@@ -172,31 +173,104 @@ describe("GET /api/articles/:article_id/comments", () => {
         expect(commentsSorted).toBeSorted({ descending: true });
       });
   });
+  test("200: When passed a valid article_id that does not contain comments,returns empty array of comments", () => {
+    return request(app)
+      .get("/api/articles/4/comments")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.comments).toEqual([]);
+      });
+  });
+  test("404: When passed a valid article_id that does not exist in the database, throws an error of not found", () => {
+    return request(app)
+      .get("/api/articles/60/comments")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("No comments found under article_id 60");
+      });
+  });
+  test("400: Bad request when passed an invalid article_id ", () => {
+    return request(app)
+      .get("/api/articles/cat/comments")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request. Please insert a valid input");
+      });
+  });
 });
 
-test("404: When passed a valid article_id that does not contain comments, throws an error of not found", () => {
-  return request(app)
-    .get("/api/articles/4/comments")
-    .expect(404)
-    .then(({ body }) => {
-      expect(body.msg).toBe("No comments found under article_id 4");
-    });
-});
-test("404: When passed a valid article_id that does not exist in the database, throws an error of not found", () => {
-  return request(app)
-    .get("/api/articles/60/comments")
-    .expect(404)
-    .then(({ body }) => {
-      expect(body.msg).toBe("No comments found under article_id 60");
-    });
-});
-test("400: Bad request when passed an invalid article_id ", () => {
-  return request(app)
-    .get("/api/articles/cat/comments")
-    .expect(400)
-    .then(({ body }) => {
-      expect(body.msg).toBe("Bad request. Please insert a valid input");
-    });
+describe("POST /api/articles/:article_id/comments", () => {
+  test("201: Responds with the new comment added.", () => {
+    const newComment = {
+      username: "butter_bridge",
+      body: "Great article!",
+    };
+    return request(app)
+      .post("/api/articles/3/comments")
+      .send(newComment)
+      .expect(201)
+      .then(({ body: { comment } }) => {
+        expect(comment).toMatchObject({
+          comment_id: expect.any(Number),
+          votes: expect.any(Number),
+          created_at: expect.any(String),
+          author: "butter_bridge",
+          body: "Great article!",
+          article_id: 3,
+        });
+      });
+  });
+  test("404: When passed a valid article_id that does not exist in the database", () => {
+    const newComment = {
+      username: "butter_bridge",
+      body: "Great article!",
+    };
+    return request(app)
+      .post("/api/articles/60/comments")
+      .send(newComment)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Article id not found");
+      });
+  });
+  test("404: When passed a username that does not exist in the users table", () => {
+    const newComment = {
+      username: "dog Milou",
+      body: "This article is really informative!",
+    };
+    return request(app)
+      .post("/api/articles/3/comments")
+      .send(newComment)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Username not found");
+      });
+  });
+  test("400: Bad request when passed an invalid article_id ", () => {
+    const newComment = {
+      username: "butter_bridge",
+      body: "Great article!",
+    };
+    return request(app)
+      .post("/api/articles/dog/comments")
+      .send(newComment)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request. Please insert a valid input");
+      });
+  });
+  test("400: Bad request when passed an invalid object to be posted", () => {
+    const newComment = {
+      body: "Great article!",
+    };
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(newComment)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request.Invalid input");
+      });
+  });
 });
 
 describe("GET /try to non-existing endpoint", () => {

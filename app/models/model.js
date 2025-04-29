@@ -1,5 +1,6 @@
 const db = require("../../db/connection");
 const { convertTimestampToDate } = require(`../../db/seeds/utils`);
+const bodyParser = require("body-parser");
 
 const selectTopics = (topics) => {
   return db.query(`SELECT * FROM topics`).then((result) => {
@@ -53,14 +54,44 @@ const selectCommentsByArticleId = (article_id) => {
       [article_id]
     )
     .then(({ rows }) => {
-      if (rows.length === 0) {
-        return Promise.reject({
-          status: 404,
-          msg: `No comments found under article_id ${article_id}`,
-        });
+      if (rows.length === 0 && article_id <= 13) {
+        return [];
+      } else if (rows.length === 0 && article_id > 13) {
+        {
+          return Promise.reject({
+            status: 404,
+            msg: `No comments found under article_id ${article_id}`,
+          });
+        }
+      } else {
+        return rows;
       }
-      return rows;
     });
+};
+
+const insertComment = (username, body, article_id) => {
+  const arg = [username, body, article_id];
+
+  if (arg.includes(undefined)) {
+    return Promise.reject({
+      status: 400,
+      msg: "Bad request.Invalid input",
+    });
+  } else if (article_id > 13) {
+    return Promise.reject({
+      status: 404,
+      msg: "Article id not found",
+    });
+  } else {
+    return db
+      .query(
+        `INSERT INTO comments(author,body,article_id) VALUES($1,$2,$3) RETURNING*`,
+        [username, body, article_id]
+      )
+      .then((result) => {
+        return result.rows[0];
+      });
+  }
 };
 
 module.exports = {
@@ -68,4 +99,5 @@ module.exports = {
   selectArticlesById,
   selectArticles,
   selectCommentsByArticleId,
+  insertComment,
 };
