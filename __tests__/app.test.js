@@ -137,3 +137,75 @@ describe("GET /api/articles", () => {
       });
   });
 });
+
+describe("GET /api/articles/:article_id/comments", () => {
+  test("200: Responds with the requested comments, selected by Id", () => {
+    return request(app)
+      .get("/api/articles/3/comments")
+      .expect(200)
+      .then(({ body: { comments } }) => {
+        expect(comments).toHaveLength(2);
+        comments.forEach((comment) => {
+          expect(comment).toEqual({
+            comment_id: expect.any(Number),
+            votes: expect.any(Number),
+            created_at: expect.any(String),
+            author: expect.any(String),
+            body: expect.any(String),
+            article_id: expect.any(Number),
+          });
+        });
+      });
+  });
+
+  test("200: Responds with the requested comments sorted by the most recent first", () => {
+    return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then(({ body: { comments } }) => {
+        expect(comments).toHaveLength(11);
+        const commentsSorted = [];
+        comments.forEach((comment) => {
+          commentsSorted.push(comment.created_at);
+        });
+
+        expect(commentsSorted).toBeSorted({ descending: true });
+      });
+  });
+});
+
+test("404: When passed a valid article_id that does not contain comments, throws an error of not found", () => {
+  return request(app)
+    .get("/api/articles/4/comments")
+    .expect(404)
+    .then(({ body }) => {
+      expect(body.msg).toBe("No comments found under article_id 4");
+    });
+});
+test("404: When passed a valid article_id that does not exist in the database, throws an error of not found", () => {
+  return request(app)
+    .get("/api/articles/60/comments")
+    .expect(404)
+    .then(({ body }) => {
+      expect(body.msg).toBe("No comments found under article_id 60");
+    });
+});
+test("400: Bad request when passed an invalid article_id ", () => {
+  return request(app)
+    .get("/api/articles/cat/comments")
+    .expect(400)
+    .then(({ body }) => {
+      expect(body.msg).toBe("Bad request. Please insert a valid input");
+    });
+});
+
+describe("GET /try to non-existing endpoint", () => {
+  test("404: Attempting to access a non-existent endpoint ", () => {
+    return request(app)
+      .get("/api/notanendpoint")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not found");
+      });
+  });
+});
