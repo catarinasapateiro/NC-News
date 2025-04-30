@@ -132,6 +132,12 @@ WHERE comment_id = $1 RETURNING*;`,
     });
 };
 
+const selectUsers = () => {
+  return db.query(`SELECT* FROM users`).then((result) => {
+    return result.rows;
+  });
+};
+
 module.exports = {
   selectTopics,
   selectArticlesById,
@@ -140,4 +146,5 @@ module.exports = {
   insertComment,
   updateArticle,
   deleteComment,
+  selectUsers,
 };
