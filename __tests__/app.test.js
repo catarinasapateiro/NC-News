@@ -314,10 +314,40 @@ describe("PATCH /api/articles/:article_id", () => {
       });
   });
 
-  test("400: Bad request when passed an invalid object input ", () => {
+  test("400: Bad request when passed an invalid object input", () => {
     return request(app)
       .patch("/api/articles/1")
       .send({ inc_votes: "cat" })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request. Please insert a valid input");
+      });
+  });
+});
+
+describe("DELETE /api/comments/:comment_id", () => {
+  test("204: Responds with an empty object", () => {
+    return request(app)
+      .delete("/api/comments/5")
+      .expect(204)
+      .then((response) => {
+        expect(response.body).toEqual({});
+      });
+  });
+  test("404: When passed a valid comment_id that does not exist in the database", () => {
+    return request(app)
+      .delete("/api/comments/60")
+      .send({ inc_votes: 1 })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Comment id not found");
+      });
+  });
+
+  test("400: Bad request when passed an invalid comment_id ", () => {
+    return request(app)
+      .delete("/api/comments/poney")
+      .send({ inc_votes: 1 })
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Bad request. Please insert a valid input");

@@ -8,6 +8,7 @@ const {
   getCommentsbyArticleId,
   postCommentsbyArticleId,
   updateArticlesById,
+  deleteCommentsById,
 } = require("./controllers/controller");
 const bodyParser = require("body-parser");
 
@@ -28,6 +29,12 @@ app.get("/api/articles/:article_id/comments", getCommentsbyArticleId);
 app.post("/api/articles/:article_id/comments", postCommentsbyArticleId);
 
 app.patch("/api/articles/:article_id", updateArticlesById);
+
+app.delete("/api/comments/:comment_id", deleteCommentsById);
+
+app.all("/*splat", (req, res) => {
+  res.status(404).send({ msg: "Not found" });
+});
 
 app.use((err, req, res, next) => {
   if (err.status && err.msg) {
@@ -57,10 +64,6 @@ app.use((err, req, res, next) => {
   res.status(500).send({ msg: "Internal Server Error" });
 
   next(err);
-});
-
-app.all("/*splat", (req, res) => {
-  res.status(404).send({ msg: "Not found" });
 });
 
 module.exports = { app };
