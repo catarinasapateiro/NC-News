@@ -11,7 +11,20 @@ const selectTopics = (topics) => {
 
 const selectArticlesById = (article_id) => {
   return db
-    .query(`SELECT * FROM articles WHERE article_id = $1`, [article_id])
+    .query(
+      `SELECT 
+  articles.*,
+  comments_count.comment_count
+FROM articles
+LEFT JOIN (
+  SELECT article_id, COUNT(*) AS comment_count
+  FROM comments
+  GROUP BY article_id
+) AS comments_count
+ON articles.article_id = comments_count.article_id
+WHERE articles.article_id = $1;`,
+      [article_id]
+    )
     .then(({ rows }) => {
       if (rows.length === 0) {
         return Promise.reject({
