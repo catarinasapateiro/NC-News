@@ -150,9 +150,9 @@ describe("GET /api/articles", () => {
         expect(votes).toBeSorted({ ascending: true });
       });
   });
-  test("400: QUERIES Bad request when passed an invalid article column", () => {
+  test("400: QUERIES Bad request when passed an invalid article column value", () => {
     return request(app)
-      .get("/api/articles?sort_by=INVALID&&order=asc")
+      .get("/api/articles?sort_by=INVALID&order=asc")
       .expect(400)
       .then(({ body: { msg } }) => {
         expect(msg).toBe("Bad request. Please insert a valid input");
@@ -164,6 +164,30 @@ describe("GET /api/articles", () => {
       .expect(400)
       .then(({ body: { msg } }) => {
         expect(msg).toBe("Bad request.Please insert a valid query");
+      });
+  });
+  test("200: QUERIES Responds with the requested articles by topic", () => {
+    return request(app)
+      .get("/api/articles?topic=cats")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles).toHaveLength(1);
+      });
+  });
+  test("400: QUERIES Bad request when passed an invalid value", () => {
+    return request(app)
+      .get("/api/articles?topic=INVALID")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request.Please insert a valid query");
+      });
+  });
+  test("400: QUERIES Bad request when passed an invalid column value", () => {
+    return request(app)
+      .get("/api/articles?invalid=cats")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request.Please insert a valid column name");
       });
   });
 });
