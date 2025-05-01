@@ -27,12 +27,12 @@ const getArticlesById = (req, res, next) => {
 };
 
 const getArticles = (req, res, next) => {
-  return selectArticles()
+  const { sort_by, order } = req.query;
+  return selectArticles(sort_by, order)
     .then((articles) => {
       res.status(200).send({ articles: articles });
     })
     .catch((err) => {
-      console.log(err);
       next(err);
     });
 };
@@ -78,7 +78,6 @@ const deleteCommentsById = (req, res, next) => {
   const { comment_id } = req.params;
   return deleteComment(comment_id)
     .then((result) => {
-      // console.log(result, "result from delete");
       res.status(204).send({});
     })
     .catch((err) => {

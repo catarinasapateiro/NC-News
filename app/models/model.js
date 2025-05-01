@@ -23,28 +23,50 @@ const selectArticlesById = (article_id) => {
     });
 };
 
-const selectArticles = () => {
-  return db
-    .query(`SELECT * FROM articles ORDER BY created_at DESC;`)
-    .then(({ rows }) => {
-      const articles = rows.map((article) => {
-        delete article.body;
-        article.comment_count = 0;
+const selectArticles = (sort_by, order) => {
+  let queryStr = `
+      SELECT 
+      articles.article_id,
+      articles.title,
+      articles.topic,
+      articles.author,
+      articles.votes,
+      articles.created_at,
+      articles.article_img_url,
+      (SELECT COUNT(*) 
+        FROM comments 
+        WHERE comments.article_id = articles.article_id)
+      AS comment_count
+      FROM articles `;
 
-        return db
-          .query(`SELECT * FROM comments WHERE article_id = $1 `, [
-            article.article_id,
-          ])
-          .then(({ rows }) => {
-            article.comment_count = rows.length;
-            return article;
-          });
+  const greenList = ["created_at", "votes", "topic"];
+  const validOrders = ["ASC", "DESC"];
+
+  if (sort_by === undefined && order === undefined) {
+    queryStr += `ORDER BY created_at DESC;`;
+  }
+
+  if (sort_by && greenList.includes(sort_by)) {
+    queryStr += `ORDER BY ${sort_by} `;
+  }
+
+  if (order) {
+    if (validOrders.includes(order.toUpperCase())) {
+      queryStr += `${order.toUpperCase()};`;
+    } else {
+      return Promise.reject({
+        status: 400,
+        msg: "Bad request.Please insert a valid query",
       });
-      return Promise.all(articles);
-    })
-    .then((result) => {
-      return result;
+    }
+  }
+
+  return db.query(queryStr).then((result) => {
+    result.rows.forEach((article) => {
+      article.comment_count = Number(article.comment_count);
     });
+    return result.rows;
+  });
 };
 
 const selectCommentsByArticleId = (article_id) => {

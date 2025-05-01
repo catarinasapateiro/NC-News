@@ -137,6 +137,35 @@ describe("GET /api/articles", () => {
         expect(datesSorted).toBeSorted({ descending: true });
       });
   });
+  test("200: QUERIES Responds with the articles sorted by the requested column", () => {
+    return request(app)
+      .get("/api/articles?sort_by=votes&&order=asc")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        const votes = [];
+        articles.forEach((article) => {
+          votes.push(article.votes);
+        });
+        expect(articles).toHaveLength(13);
+        expect(votes).toBeSorted({ ascending: true });
+      });
+  });
+  test("400: QUERIES Bad request when passed an invalid article column", () => {
+    return request(app)
+      .get("/api/articles?sort_by=INVALID&&order=asc")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request. Please insert a valid input");
+      });
+  });
+  test("400: QUERIES Bad request when passed an invalid value", () => {
+    return request(app)
+      .get("/api/articles?sort_by=votes&&order=INVALID")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request.Please insert a valid query");
+      });
+  });
 });
 
 describe("GET /api/articles/:article_id/comments", () => {
@@ -337,7 +366,6 @@ describe("DELETE /api/comments/:comment_id", () => {
   test("404: When passed a valid comment_id that does not exist in the database", () => {
     return request(app)
       .delete("/api/comments/60")
-      .send({ inc_votes: 1 })
       .expect(404)
       .then(({ body }) => {
         expect(body.msg).toBe("Comment id not found");
