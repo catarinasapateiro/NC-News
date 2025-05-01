@@ -64,8 +64,6 @@ const selectArticles = (sort_by, order) => {
     }
   }
 
-  console.log(queryStr);
-
   return db.query(queryStr).then((result) => {
     result.rows.forEach((article) => {
       article.comment_count = Number(article.comment_count);
