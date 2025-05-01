@@ -25,29 +25,32 @@ const selectArticlesById = (article_id) => {
 
 const selectArticles = (sort_by, order) => {
   let queryStr = `
-      SELECT 
-      articles.article_id,
-      articles.title,
-      articles.topic,
-      articles.author,
-      articles.votes,
-      articles.created_at,
-      articles.article_img_url,
-      (SELECT COUNT(*) 
-        FROM comments 
-        WHERE comments.article_id = articles.article_id)
-      AS comment_count
-      FROM articles `;
+    SELECT 
+    articles.article_id,
+    articles.title,
+    articles.topic,
+    articles.author,
+    articles.created_at,
+    articles.votes,
+    articles.article_img_url,
+    comments_count.comment_count
+    FROM articles
+    LEFT JOIN (
+    SELECT article_id, COUNT(*) AS comment_count
+    FROM comments
+    GROUP BY article_id
+    ) AS comments_count
+    ON articles.article_id = comments_count.article_id `;
 
   const greenList = ["created_at", "votes", "topic"];
   const validOrders = ["ASC", "DESC"];
 
   if (sort_by === undefined && order === undefined) {
-    queryStr += `ORDER BY created_at DESC;`;
+    queryStr += `ORDER BY articles.created_at DESC; `;
   }
 
   if (sort_by && greenList.includes(sort_by)) {
-    queryStr += `ORDER BY ${sort_by} `;
+    queryStr += `ORDER BY articles.${sort_by} `;
   }
 
   if (order) {
@@ -60,6 +63,8 @@ const selectArticles = (sort_by, order) => {
       });
     }
   }
+
+  console.log(queryStr);
 
   return db.query(queryStr).then((result) => {
     result.rows.forEach((article) => {
