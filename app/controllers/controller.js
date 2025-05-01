@@ -27,8 +27,28 @@ const getArticlesById = (req, res, next) => {
 };
 
 const getArticles = (req, res, next) => {
-  const { sort_by, order } = req.query;
-  return selectArticles(sort_by, order)
+  const keys = Object.keys(req.query);
+  const { sort_by, order, topic } = req.query;
+  const validKeys = ["sort_by", "order", "topic"];
+  let valid = true;
+
+  if (keys.length > 0) {
+    keys.forEach((key) => {
+      if (validKeys.includes(key)) {
+        valid = true;
+      } else {
+        valid = false;
+      }
+    });
+  }
+  if (valid === false) {
+    return Promise.reject({
+      status: 400,
+      msg: "Bad request.Please insert a valid column name",
+    });
+  }
+
+  return selectArticles(sort_by, order, topic)
     .then((articles) => {
       res.status(200).send({ articles: articles });
     })
