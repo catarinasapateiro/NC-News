@@ -60,8 +60,23 @@ describe("GET /api/articles", () => {
           votes: 0,
           article_img_url:
             "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-          comment_count: null,
         });
+      });
+  });
+  test("200: Responds with the requested article, selected by Id. The article has a new property comment_count that counts the total number of comments by article id", () => {
+    return request(app)
+      .get("/api/articles/1")
+      .expect(200)
+      .then(({ body: { article } }) => {
+        expect(article).toHaveProperty("comment_count", 11);
+        expect(article).toHaveProperty("title", expect.any(String));
+        expect(article).toHaveProperty("topic", expect.any(String));
+        expect(article).toHaveProperty("body", expect.any(String));
+        expect(article).toHaveProperty("created_at", expect.any(String));
+        expect(article).toHaveProperty("votes", expect.any(Number));
+        expect(article).toHaveProperty("article_img_url", expect.any(String));
+        expect(article).toHaveProperty("article_id", expect.any(Number));
+        expect(article).toHaveProperty("author", expect.any(String));
       });
   });
   test("404: When passed a valid article_id that does not exist in the database", () => {
@@ -183,6 +198,14 @@ describe("GET /api/articles", () => {
           article_img_url: expect.any(String),
           comment_count: expect.any(Number),
         });
+      });
+  });
+  test("200: QUERIES Responds with the requested articles by topic. As there is no articles with paper topic, responds with an empty array", () => {
+    return request(app)
+      .get("/api/articles?topic=paper")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles).toEqual([]);
       });
   });
   test("400: QUERIES Bad request when passed an invalid value", () => {

@@ -31,8 +31,10 @@ WHERE articles.article_id = $1;`,
           status: 404,
           msg: `No article found under article_id ${article_id}`,
         });
+      } else {
+        rows[0].comment_count = Number(rows[0].comment_count);
+        return rows[0];
       }
-      return rows[0];
     });
 };
 
@@ -55,7 +57,7 @@ LEFT JOIN (
 ON articles.article_id = comments_count.article_id `;
 
   const greenList = ["created_at", "votes", "topic"];
-  const topics = ["mitch", "cats"];
+  const topics = ["mitch", "cats", "paper"];
   const validOrders = ["ASC", "DESC"];
 
   if (sort_by === undefined && order === undefined && topic === undefined) {
@@ -91,9 +93,11 @@ ON articles.article_id = comments_count.article_id `;
   queryStr += `;`;
 
   return db.query(queryStr).then((result) => {
+   
     result.rows.forEach((article) => {
       article.comment_count = Number(article.comment_count);
     });
+
     return result.rows;
   });
 };
