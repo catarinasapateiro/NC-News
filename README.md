@@ -10,6 +10,10 @@
 # Installing required dependencies
 
 - Refer to the package.json file and install all dependencies under Dependencies and Devdependencies
+- Minimum required versions
+
+  1.  express - 5.1.0
+  2.  Node js - v23.8.0
 
 # Repository structure
 
