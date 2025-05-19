@@ -13,6 +13,10 @@ const {
 } = require("./controllers/controller");
 const bodyParser = require("body-parser");
 
+const cors = require("cors");
+
+app.use(cors());
+
 app.use(express.json());
 
 app.get("/api", (req, res) => {
