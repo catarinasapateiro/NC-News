@@ -241,6 +241,7 @@ describe("GET /api/articles/:article_id/comments", () => {
             author: expect.any(String),
             body: expect.any(String),
             article_id: expect.any(Number),
+            avatar_url: expect.any(String),
           });
         });
       });

@@ -104,7 +104,11 @@ ON articles.article_id = comments_count.article_id `;
 const selectCommentsByArticleId = (article_id) => {
   return db
     .query(
-      `SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC`,
+      `SELECT c.*, u.avatar_url 
+       FROM comments c 
+JOIN users u ON c.author = u.username 
+WHERE c.article_id = $1 
+ORDER BY c.created_at DESC;`,
       [article_id]
     )
     .then(({ rows }) => {
