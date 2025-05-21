@@ -7,6 +7,7 @@ const {
   updateArticle,
   deleteComment,
   selectUsers,
+  selectUserByUsername,
 } = require("../models/model");
 
 const getTopics = (req, res) => {
@@ -115,6 +116,17 @@ const getUsers = (req, res) => {
     });
 };
 
+const getUserByUsername = (req, res) => {
+  const { username } = req.params;
+  return selectUserByUsername(username)
+    .then((result) => {
+      res.status(200).send({ users: result });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
 module.exports = {
   getTopics,
   getArticlesById,
@@ -124,4 +136,5 @@ module.exports = {
   updateArticlesById,
   deleteCommentsById,
   getUsers,
+  getUserByUsername,
 };

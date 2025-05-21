@@ -93,7 +93,6 @@ ON articles.article_id = comments_count.article_id `;
   queryStr += `;`;
 
   return db.query(queryStr).then((result) => {
-   
     result.rows.forEach((article) => {
       article.comment_count = Number(article.comment_count);
     });
@@ -193,6 +192,14 @@ const selectUsers = () => {
   });
 };
 
+const selectUserByUsername = (username) => {
+  return db
+    .query(`SELECT* FROM users   WHERE username=$1`, [username])
+    .then((result) => {
+      return result.rows;
+    });
+};
+
 module.exports = {
   selectTopics,
   selectArticlesById,
@@ -202,4 +209,5 @@ module.exports = {
   updateArticle,
   deleteComment,
   selectUsers,
+  selectUserByUsername,
 };

@@ -10,6 +10,7 @@ const {
   updateArticlesById,
   deleteCommentsById,
   getUsers,
+  getUserByUsername,
 } = require("./controllers/controller");
 const bodyParser = require("body-parser");
 
@@ -38,6 +39,8 @@ app.patch("/api/articles/:article_id", updateArticlesById);
 app.delete("/api/comments/:comment_id", deleteCommentsById);
 
 app.get("/api/users", getUsers);
+
+app.get("/api/users/:username", getUserByUsername);
 
 app.all("/*splat", (req, res) => {
   res.status(404).send({ msg: "Not found" });
