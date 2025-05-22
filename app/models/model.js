@@ -112,9 +112,9 @@ ORDER BY c.created_at DESC;`,
       [article_id]
     )
     .then(({ rows }) => {
-      if (rows.length === 0 && article_id <= 13) {
+      if (rows.length === 0 && article_id <= 37) {
         return [];
-      } else if (rows.length === 0 && article_id > 13) {
+      } else if (rows.length === 0 && article_id > 37) {
         {
           return Promise.reject({
             status: 404,
