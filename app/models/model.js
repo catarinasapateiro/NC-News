@@ -135,7 +135,7 @@ const insertComment = (username, body, article_id) => {
       status: 400,
       msg: "Bad request.Invalid input",
     });
-  } else if (article_id > 13) {
+  } else if (article_id > 37) {
     return Promise.reject({
       status: 404,
       msg: "Article id not found",
