@@ -57,7 +57,7 @@ LEFT JOIN (
 ON articles.article_id = comments_count.article_id `;
 
   const greenList = ["created_at", "votes", "topic"];
-  const topics = ["mitch", "cats", "paper"];
+  const topics = ["coding", "cooking", "football", "cats", "paper"];
   const validOrders = ["ASC", "DESC"];
 
   if (sort_by === undefined && order === undefined && topic === undefined) {
