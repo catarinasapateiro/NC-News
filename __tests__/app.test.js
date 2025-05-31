@@ -179,7 +179,7 @@ describe("GET /api/articles", () => {
       .get("/api/articles?sort_by=votes&&order=INVALID")
       .expect(400)
       .then(({ body: { msg } }) => {
-        expect(msg).toBe("Bad request.Please insert a valid query");
+        expect(msg).toBe("Please insert ASC or DESC");
       });
   });
   test("200: QUERIES Responds with the requested articles by topic", () => {
@@ -211,9 +211,9 @@ describe("GET /api/articles", () => {
   test("400: QUERIES Bad request when passed an invalid value", () => {
     return request(app)
       .get("/api/articles?topic=INVALID")
-      .expect(400)
+      .expect(404)
       .then(({ body: { msg } }) => {
-        expect(msg).toBe("Bad request.Please insert a valid query");
+        expect(msg).toBe("Topic not found");
       });
   });
   test("400: QUERIES Bad request when passed an invalid column value", () => {

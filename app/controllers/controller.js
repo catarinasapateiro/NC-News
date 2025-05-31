@@ -29,6 +29,7 @@ const getArticlesById = (req, res, next) => {
 
 const getArticles = (req, res, next) => {
   const keys = Object.keys(req.query);
+  console.log(req.query);
   const { sort_by, order, topic } = req.query;
   const validKeys = ["sort_by", "order", "topic"];
   let valid = true;
