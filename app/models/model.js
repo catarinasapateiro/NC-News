@@ -56,7 +56,7 @@ LEFT JOIN (
 ) AS comments_count
 ON articles.article_id = comments_count.article_id `;
 
-  const greenList = ["created_at", "votes", "topic", "comment_count"];
+  const greenList = ["created_at", "votes", "topic", "comments_count"];
   const topics = ["coding", "cooking", "football", "cats", "paper"];
   const validOrders = ["ASC", "DESC"];
 
