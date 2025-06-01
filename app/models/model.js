@@ -40,48 +40,31 @@ WHERE articles.article_id = $1;`,
 
 const selectArticles = (sort_by, order, topic) => {
   let queryStr = `SELECT 
-  articles.article_id,
-  articles.title,
-  articles.topic,
-  articles.author,
-  articles.created_at,
-  articles.votes,
-  articles.article_img_url,
-  comments_count.comment_count
-FROM articles
-LEFT JOIN (
-  SELECT article_id, COUNT(*) AS comment_count
-  FROM comments
-  GROUP BY article_id
-) AS comments_count
-ON articles.article_id = comments_count.article_id `;
+    articles.article_id,
+    articles.title,
+    articles.topic,
+    articles.author,
+    articles.created_at,
+    articles.votes,
+    articles.article_img_url,
+    COALESCE(comments_count.comment_count, 0) AS comment_count
+  FROM articles
+  LEFT JOIN (
+    SELECT 
+      article_id, 
+      COUNT(*)::INT AS comment_count
+    FROM comments
+    GROUP BY article_id
+  ) AS comments_count 
+    ON articles.article_id = comments_count.article_id`;
 
-  const greenList = ["created_at", "votes", "topic", "comments_count"];
+  const greenList = ["created_at", "votes", "topic", "comment_count"];
   const topics = ["coding", "cooking", "football", "cats", "paper"];
   const validOrders = ["ASC", "DESC"];
 
-  if (sort_by === undefined && order === undefined && topic === undefined) {
-    queryStr += `ORDER BY articles.created_at DESC`;
-  }
-
-  if (sort_by && greenList.includes(sort_by)) {
-    queryStr += `ORDER BY articles.${sort_by} `;
-  }
-
-  if (order) {
-    if (validOrders.includes(order.toUpperCase())) {
-      queryStr += `${order.toUpperCase()};`;
-    } else {
-      return Promise.reject({
-        status: 400,
-        msg: "Please insert ASC or DESC",
-      });
-    }
-  }
-
   if (topic) {
     if (topics.includes(topic.toLowerCase())) {
-      queryStr += ` WHERE topic = '${topic}'`;
+      queryStr += ` WHERE articles.topic = '${topic}'`;
     } else {
       return Promise.reject({
         status: 404,
@@ -90,14 +73,37 @@ ON articles.article_id = comments_count.article_id `;
     }
   }
 
-  queryStr += `;`;
+  let orderBy = "";
+  if (sort_by && greenList.includes(sort_by)) {
+    const column =
+      sort_by === "comment_count" ? "comment_count" : `articles.${sort_by}`;
+
+    orderBy = ` ORDER BY ${column}`;
+  } else {
+    orderBy = " ORDER BY articles.created_at";
+  }
+
+  if (order) {
+    if (validOrders.includes(order.toUpperCase())) {
+      orderBy += ` ${order.toUpperCase()}`;
+    } else {
+      return Promise.reject({
+        status: 400,
+        msg: "Please insert ASC or DESC",
+      });
+    }
+  } else {
+    orderBy += " DESC";
+  }
+
+  queryStr += orderBy + ";";
+  console.log("Final query:", queryStr);
 
   return db.query(queryStr).then((result) => {
-    result.rows.forEach((article) => {
-      article.comment_count = Number(article.comment_count);
-    });
-
-    return result.rows;
+    return result.rows.map((article) => ({
+      ...article,
+      comment_count: Number(article.comment_count),
+    }));
   });
 };
 

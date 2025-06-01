@@ -166,6 +166,19 @@ describe("GET /api/articles", () => {
         expect(votes).toBeSorted({ ascending: true });
       });
   });
+  test.only("200: QUERIES Responds with the articles sorted by the requested column", () => {
+    return request(app)
+      .get("/api/articles?sort_by=comment_count&&order=asc")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        const votes = [];
+        articles.forEach((article) => {
+          votes.push(article.comment_count);
+        });
+        expect(articles).toHaveLength(13);
+        expect(votes).toBeSorted({ ascending: true });
+      });
+  });
   test("400: QUERIES Bad request when passed an invalid article column value", () => {
     return request(app)
       .get("/api/articles?sort_by=INVALID&order=asc")
